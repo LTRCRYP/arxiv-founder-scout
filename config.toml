@@ -1,0 +1,134 @@
+# arxiv-founder-scout configuration. Edit freely; every stage re-reads this file.
+
+[general]
+db_path = "data/scout.sqlite"
+data_dir = "data"
+reports_dir = "reports"
+# A startup is "new" if founded within this many months.
+new_startup_months = 24
+# Sent as the User-Agent to arXiv, OpenAlex, Semantic Scholar and ORCID.
+# SEC EDGAR requires SEC_USER_AGENT in .env in the form "Name email@example.com".
+user_agent = "arxiv-founder-scout/0.1 (research tool)"
+
+[arxiv]
+categories = ["cs.AI", "cs.LG", "cs.RO"]
+# Default ingest window when --since/--until are not given. The API only exposes papers after
+# announcement (weekdays ~20:00 ET), so a 4-day lookback plus the built-in 1-day overlap is safe.
+default_days = 4
+page_size = 200
+# arXiv asks for no more than one request every three seconds.
+min_interval_seconds = 3.0
+
+[enrich]
+# Semantic Scholar is queried per paper (precise author disambiguation).
+# OpenAlex is queried per paper for institutions and ORCID when a key is set.
+use_semantic_scholar = true
+use_openalex = true
+semantic_scholar_min_interval_seconds = 1.0
+openalex_min_interval_seconds = 0.2
+
+[screen]
+model = "claude-opus-5-5"
+max_tokens = 1024
+# Set to true to send LLM screening through the Message Batches API (50% cheaper, async).
+use_batch_api = false
+# Papers must hit at least this many topic keywords to be sent to the LLM (0 = screen all).
+prefilter_min_keyword_hits = 0
+
+# Weights for the composite score (0-100). They are normalised, so they need not sum to 1.
+[screen.weights]
+topic_fit = 0.30
+novelty = 0.15
+commercial_applicability = 0.25
+code_released = 0.10
+author_track_record = 0.20
+
+[screen.topic]
+# Shown to the LLM verbatim as the definition of "topic fit". Edit to your thesis.
+description = """
+Applied machine learning, AI systems and robotics with a plausible path to a product
+or company within 2-3 years: foundation-model applications and infrastructure,
+agents and tool use, efficient inference and training, robotics learning and
+manipulation, autonomous systems, ML for science, healthcare, finance or industry.
+Pure theory, surveys, position papers and incremental benchmark papers are a poor fit.
+"""
+keywords = [
+  "agent", "LLM", "large language model", "foundation model", "inference", "robot",
+  "manipulation", "autonomous", "deployment", "real-world", "production", "system",
+  "benchmark", "open-source", "efficient", "fine-tuning", "retrieval", "multimodal",
+]
+
+[screen.commercial_signals]
+code_patterns = ["github.com", "gitlab.com", "huggingface.co", "code is available", "code available at", "open-source", "open source"]
+system_patterns = ["we deploy", "deployed", "production", "real-world", "end-to-end system", "we build a system", "platform", "pipeline"]
+benchmark_patterns = ["state-of-the-art", "state of the art", "sota", "outperform", "new benchmark", "we release"]
+
+[screen.track_record]
+# h-index and total citations at which the author track-record criterion saturates (score 10).
+h_index_full_score = 30
+citations_full_score = 5000
+
+[founders]
+# Enabled source adapters, run in this order. Each has a section below.
+enabled = ["sec_formd", "csv_import"]
+
+[founders.sec_formd]
+# Industry groups to keep (others, e.g. "Pooled Investment Fund", are dropped).
+industry_groups = ["Other Technology", "Computers", "Business Services", "Telecommunications",
+                   "Biotechnology", "Other Health Care", "Pharmaceuticals", "Manufacturing", "Other"]
+entity_types = ["Corporation", "Limited Liability Company", "Limited Partnership", "Other"]
+# Companies whose names match any of these regexes are dropped (funds, SPVs, holding vehicles).
+exclude_name_patterns = ["\\bfund\\b", "\\bl\\.?p\\.?$", "\\bspv\\b", "\\bcapital partners\\b", "\\bholdings?\\b", "\\bventures?\\b", "\\binvestors?\\b", "\\bportfolio\\b", "\\bseries [a-z0-9]+\\b", "\\bsecurities\\b", "\\bequity\\b", "\\breit\\b", "\\btrust\\b"]
+# Related-person roles to import as founders/executives.
+roles = ["Executive Officer", "Director", "Promoter"]
+
+[founders.csv_import]
+# One or more CSV exports (Crunchbase, PitchBook, hand-made). Columns are mapped below.
+paths = ["data/founders/*.csv"]
+# Founders column may list several names separated by this.
+founders_separator = ";"
+[founders.csv_import.columns]
+# Values are lists of candidate column headers; the first one present is used.
+name = ["Organization Name", "Company Name", "Companies", "name"]
+description = ["Full Description", "Description", "description"]
+website = ["Website", "Website URL", "website"]
+founded_date = ["Founded Date", "Year Founded", "founded_date"]
+location = ["Headquarters Location", "HQ Location", "location"]
+founders = ["Founders", "founders"]
+industry = ["Industries", "Primary Industry Sector", "industry"]
+raised_usd = ["Total Funding Amount (in USD)", "Total Raised", "raised_usd"]
+
+[founders.yc_oss]
+# DISABLED BY DEFAULT. ycombinator.com's terms prohibit scraping; this adapter reads the
+# third-party yc-oss mirror (no founder names, company-level only). Enable at your own discretion.
+url = "https://yc-oss.github.io/api/companies/all.json"
+
+[match]
+# Confidence tiers.
+confirmed_threshold = 0.85
+probable_threshold = 0.60
+# Pairs below this are not stored at all.
+store_threshold = 0.25
+# Name-frequency penalty: if Semantic Scholar knows more than this many distinct authors
+# with the exact name, the name signal is discounted.
+common_name_author_count = 20
+
+[match.signals]
+name_exact = 0.45
+name_fuzzy = 0.35
+name_initials = 0.20
+homepage_domain = 0.30
+orcid_employment = 0.30
+coauthor_same_company = 0.20
+location_overlap = 0.15
+affiliation_company_name = 0.25
+area_overlap_max = 0.15
+industry_tech_bonus = 0.05
+common_name_penalty = -0.15
+ambiguous_name_penalty = -0.10
+
+[report]
+top_papers = 25
+# Papers in the "no known startup" list need at least this composite score.
+unfounded_min_score = 65
+unfounded_max = 25

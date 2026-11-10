@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <opensearch:totalResults>3</opensearch:totalResults>
+  <entry>
+    <id>http://arxiv.org/abs/2611.00001v1</id>
+    <updated>2026-11-03T01:00:00Z</updated>
+    <published>2026-11-03T01:00:00Z</published>
+    <title>Robotic   Manipulation with
+      Foundation Models</title>
+    <summary>We present a deployed system for warehouse picking. Code is available at https://github.com/acme-robotics/pick.</summary>
+    <author><name>José García-López</name><arxiv:affiliation>Stanford University</arxiv:affiliation></author>
+    <author><name>Wei Zhang</name></author>
+    <author><name>Priya Natarajan</name></author>
+    <arxiv:comment>12 pages. Project page: https://acme-robotics.ai</arxiv:comment>
+    <arxiv:primary_category term="cs.RO"/>
+    <category term="cs.RO"/><category term="cs.AI"/>
+    <link href="http://arxiv.org/abs/2611.00001v1" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2611.00001v1" rel="related" type="application/pdf"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2611.00002v1</id>
+    <updated>2026-11-03T02:00:00Z</updated>
+    <published>2026-11-03T02:00:00Z</published>
+    <title>A Survey of Graph Neural Networks</title>
+    <summary>We survey the literature.</summary>
+    <author><name>Wei Zhang</name></author>
+    <author><name>John Smith</name></author>
+    <arxiv:primary_category term="cs.LG"/>
+    <category term="cs.LG"/>
+    <link href="http://arxiv.org/abs/2611.00002v1" rel="alternate" type="text/html"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2611.00003v1</id>
+    <updated>2026-11-04T02:00:00Z</updated>
+    <published>2026-11-04T02:00:00Z</published>
+    <title>Efficient LLM Inference on Edge Devices</title>
+    <summary>A new kernel achieving state-of-the-art throughput. We release our open-source runtime.</summary>
+    <author><name>Amara Okafor</name></author>
+    <author><name>J. Smith</name></author>
+    <arxiv:primary_category term="cs.LG"/>
+    <category term="cs.LG"/><category term="cs.AI"/>
+    <link href="http://arxiv.org/abs/2611.00003v1" rel="alternate" type="text/html"/>
+  </entry>
+</feed>
